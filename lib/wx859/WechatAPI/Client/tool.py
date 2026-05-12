@@ -4,21 +4,26 @@ import os
 from typing import Union
 
 import aiohttp
+
 try:
     import pysilk
     PYSILK_AVAILABLE = True
 except ImportError:
     pysilk = None
     PYSILK_AVAILABLE = False
-from pydub import AudioSegment
-import logging
 
-logger = logging.getLogger(__name__)
+try:
+    from pydub import AudioSegment
+except ImportError:
+    AudioSegment = None
 
 from .base import *
 from .protect import protector
 from ..errors import *
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ToolMixin(WechatAPIClientBase):
     async def download_image(self, aeskey: str, cdnmidimgurl: str) -> str:
@@ -301,6 +306,8 @@ class ToolMixin(WechatAPIClientBase):
         Raises:
             Exception: 转换失败时抛出异常
         """
+        if AudioSegment is None:
+            raise ImportError("pydub is not installed")
         try:
             # 从字节数据创建 AudioSegment 对象
             audio = AudioSegment.from_wav(io.BytesIO(wav_byte))
@@ -342,6 +349,8 @@ class ToolMixin(WechatAPIClientBase):
         Returns:
             bytes: silk格式的字节数据
         """
+        if AudioSegment is None:
+            raise ImportError("pydub is not installed")
         # get pcm data
         audio = AudioSegment.from_wav(io.BytesIO(wav_byte))
         pcm = audio.raw_data

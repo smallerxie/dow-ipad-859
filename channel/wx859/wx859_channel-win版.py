@@ -8,7 +8,6 @@ import io
 import sys
 import traceback 
 import xml.etree.ElementTree as ET  
-import cv2
 import aiohttp
 import uuid 
 from typing import Union, BinaryIO, Optional, Tuple, List, Dict
@@ -35,8 +34,15 @@ from pathlib import Path
 import base64
 import subprocess
 import math
-from pydub import AudioSegment # Added for audio duration
 from io import BytesIO # Added for pydub if it operates on BytesIO
+
+# Attempt to import pydub
+try:
+    from pydub import AudioSegment # Added for audio duration
+    PYDUB_AVAILABLE = True
+except ImportError:
+    PYDUB_AVAILABLE = False
+    logger.warning("[WX859] pydub library not found. Voice message processing will be unavailable.")
 import functools
 
 # Attempt to import pysilk
@@ -6600,6 +6606,9 @@ class WX859Channel(ChatChannel):
         if not PYSLIK_AVAILABLE:
             logger.error("[WX859] Send voice failed: pysilk library is not available.")
             return {"Success": False, "Message": "pysilk library not available"}
+        if not PYDUB_AVAILABLE:
+            logger.error("[WX859] Send voice failed: pydub library is not available.")
+            return {"Success": False, "Message": "pydub library not available"}
 
         try:
             if not to_user_id:
