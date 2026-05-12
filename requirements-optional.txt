@@ -13,6 +13,10 @@ langid # language detect
 elevenlabs==1.0.3 # elevenlabs TTS
 pilk==0.2.4 # process wechat silk file
 
+# video
+opencv-python-headless # cv2 for video thumbnail extraction (wx859 channel)
+pymediainfo # video info extraction (wx859 WechatAPI)
+
 #install plugin
 dulwich
 
@@ -51,3 +55,4 @@ dashscope
 
 # tencentcloud sdk
 tencentcloud-sdk-python>=3.0.0
+

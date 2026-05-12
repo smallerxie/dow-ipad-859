@@ -9,8 +9,15 @@ from typing import Union
 
 import aiohttp
 from loguru import logger
-from pydub import AudioSegment
-from pymediainfo import MediaInfo
+try:
+    from pymediainfo import MediaInfo
+except ImportError:
+    MediaInfo = None
+
+try:
+    from pydub import AudioSegment
+except ImportError:
+    AudioSegment = None
 
 from .base import *
 from .protect import protector
@@ -209,6 +216,8 @@ class MessageMixin(WechatAPIClientBase):
                     ValueError: 视频或图片参数都为空或都不为空时
                     根据error_handler处理错误
                 """
+        if MediaInfo is None:
+            raise ImportError("pymediainfo is not installed, video duration extraction is unavailable")
         if not image:
             image = Path(os.path.join(Path(__file__).resolve().parent, "fallback.png"))
         # get video base64 and duration
@@ -314,6 +323,8 @@ class MessageMixin(WechatAPIClientBase):
 
     async def _send_voice_message(self, wxid: str, voice: Union[str, bytes, os.PathLike], format: str = "amr") -> \
             tuple[int, int, int]:
+        if AudioSegment is None:
+            raise ImportError("pydub is not installed, voice message processing is unavailable")
         if not self.wxid:
             raise UserLoggedOut("请先登录")
         elif not self.ignore_protect and protector.check(14400):

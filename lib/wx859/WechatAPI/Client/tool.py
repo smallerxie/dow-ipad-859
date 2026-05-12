@@ -10,8 +10,12 @@ try:
 except ImportError:
     pysilk = None
     PYSILK_AVAILABLE = False
-from pydub import AudioSegment
 from loguru import logger
+
+try:
+    from pydub import AudioSegment
+except ImportError:
+    AudioSegment = None
 
 from .base import *
 from .protect import protector
@@ -299,6 +303,8 @@ class ToolMixin(WechatAPIClientBase):
         Raises:
             Exception: 转换失败时抛出异常
         """
+        if AudioSegment is None:
+            raise ImportError("pydub is not installed")
         try:
             # 从字节数据创建 AudioSegment 对象
             audio = AudioSegment.from_wav(io.BytesIO(wav_byte))
@@ -340,6 +346,8 @@ class ToolMixin(WechatAPIClientBase):
         Returns:
             bytes: silk格式的字节数据
         """
+        if AudioSegment is None:
+            raise ImportError("pydub is not installed")
         # get pcm data
         audio = AudioSegment.from_wav(io.BytesIO(wav_byte))
         pcm = audio.raw_data
