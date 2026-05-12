@@ -2,12 +2,12 @@
 
 ## 概述
 
-本报告详细分析了 `lib/WechatAPI/Client` 与 `lib/859/win/swagger` 中定义的859协议API接口的兼容性，并记录了为确保兼容性所做的修改。
+本报告详细分析了 `lib/wx859/WechatAPI/Client` 与 `lib/wx859/859/win/swagger` 中定义的859协议API接口的兼容性，并记录了为确保兼容性所做的修改。
 
 ## 分析范围
 
-- **859协议API定义**: `lib/859/win/swagger/swagger.json`
-- **WechatAPI Client实现**: `lib/WechatAPI/Client/`
+- **859协议API定义**: `lib/wx859/859/win/swagger/swagger.json`
+- **WechatAPI Client实现**: `lib/wx859/WechatAPI/Client/`
 - **重点模块**: 登录模块 (`login.py`) 和消息模块 (`message.py`)
 
 ## API接口对比结果
@@ -132,7 +132,7 @@
 ## 修改总结
 
 ### 修改的文件
-- `lib/WechatAPI/Client/login.py`
+- `lib/wx859/WechatAPI/Client/login.py`
 
 ### 修改的方法
 1. `get_qr_code()` - 修改API端点和参数字段名
@@ -144,8 +144,8 @@
 7. `get_auto_heartbeat_status()` - 修改API端点
 
 ### 未修改的部分
-- `lib/WechatAPI/Client/message.py` - 所有消息相关API已与859协议匹配
-- `lib/WechatAPI/Client/base.py` - 基础类无需修改
+- `lib/wx859/WechatAPI/Client/message.py` - 所有消息相关API已与859协议匹配
+- `lib/wx859/WechatAPI/Client/base.py` - 基础类无需修改
 - 其他模块 - 暂未涉及本次兼容性分析
 
 ## 兼容性状态
