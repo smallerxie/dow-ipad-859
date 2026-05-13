@@ -294,6 +294,8 @@ class WX859Channel(ChatChannel):
 
     def __init__(self):
         super().__init__()
+        self.api_host = conf().get("wx859_api_host", "127.0.0.1")
+        self.api_port = conf().get("wx859_api_port", 8059)
         self.received_msgs = ExpiredDict(conf().get("expires_in_seconds", 3600))
         self.recent_image_msgs = ExpiredDict(conf().get("image_expires_in_seconds", 7200)) # Added initialization
         self.bot = None
@@ -879,7 +881,7 @@ class WX859Channel(ChatChannel):
                     logger.info(f"[WX859] 正在调用AutoHeartBeat API启动消息监听...")
                     try:
                         async with aiohttp.ClientSession() as session:
-                            heartbeat_url = f"http://127.0.0.1:8059/api/Login/AutoHeartBeat?wxid={new_wxid}"
+                            heartbeat_url = f"http://{self.api_host}:{self.api_port}/api/Login/AutoHeartBeat?wxid={new_wxid}"
                             async with session.post(heartbeat_url) as response:
                                 heartbeat_result = await response.json()
                                 if heartbeat_result and heartbeat_result.get("Success", False):
@@ -950,7 +952,7 @@ class WX859Channel(ChatChannel):
                     
                     # 步骤1：调用LoginCheckQR API确认扫码状态
                     logger.debug("[WX859] 正在调用LoginCheckQR API...")
-                    qr_check_url = f"http://127.0.0.1:8059/api/Login/LoginCheckQR?uuid={uuid}"
+                    qr_check_url = f"http://{self.api_host}:{self.api_port}/api/Login/LoginCheckQR?uuid={uuid}"
                     async with session.post(qr_check_url) as response:
                         qr_check_result = await response.json()
 
@@ -981,11 +983,11 @@ class WX859Channel(ChatChannel):
                         
                         # 根据获取到的wxid选择API调用方式
                         if real_wxid and not real_wxid.startswith("temp_"):
-                            twice_auth_url = f"http://127.0.0.1:8059/api/Login/LoginTwiceAutoAuth?wxid={real_wxid}"
+                            twice_auth_url = f"http://{self.api_host}:{self.api_port}/api/Login/LoginTwiceAutoAuth?wxid={real_wxid}"
                             logger.info(f"[WX859] 使用真实wxid参数调用LoginTwiceAutoAuth: {real_wxid}")
                         else:
                             # 作为备选方案，使用uuid
-                            twice_auth_url = f"http://127.0.0.1:8059/api/Login/LoginTwiceAutoAuth?uuid={uuid}"
+                            twice_auth_url = f"http://{self.api_host}:{self.api_port}/api/Login/LoginTwiceAutoAuth?uuid={uuid}"
                             logger.info(f"[WX859] 使用uuid参数调用LoginTwiceAutoAuth: {uuid}")
                         
                         async with session.post(twice_auth_url) as response:
@@ -1035,7 +1037,7 @@ class WX859Channel(ChatChannel):
             try:
                 call_count += 1
                 logger.info(f"[WX859] 第{call_count}次调用Newinit API，剩余 {newinit_timeout} 秒...")
-                newinit_url = f"http://127.0.0.1:8059/api/Login/Newinit?wxid={wxid}"
+                newinit_url = f"http://{self.api_host}:{self.api_port}/api/Login/Newinit?wxid={wxid}"
                 
                 async with session.post(newinit_url) as response:
                     response_status = response.status
@@ -1412,7 +1414,7 @@ class WX859Channel(ChatChannel):
             logger.info(f"[WX859] 正在启动自动心跳，wxid: {wxid}")
             import aiohttp
             async with aiohttp.ClientSession() as session:
-                heartbeat_url = f"http://127.0.0.1:8059/api/Login/AutoHeartBeat?wxid={wxid}"
+                heartbeat_url = f"http://{self.api_host}:{self.api_port}/api/Login/AutoHeartBeat?wxid={wxid}"
                 async with session.post(heartbeat_url) as response:
                     heartbeat_result = await response.json()
                     if heartbeat_result and heartbeat_result.get("Success", False):

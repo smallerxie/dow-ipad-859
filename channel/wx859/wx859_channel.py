@@ -294,6 +294,8 @@ class WX859Channel(ChatChannel):
 
     def __init__(self):
         super().__init__()
+        self.api_host = conf().get("wx859_api_host", "127.0.0.1")
+        self.api_port = conf().get("wx859_api_port", 8059)
         self.received_msgs = ExpiredDict(conf().get("expires_in_seconds", 3600))
         self.recent_image_msgs = ExpiredDict(conf().get("image_expires_in_seconds", 7200)) # Added initialization
         self.bot = None
@@ -539,9 +541,6 @@ class WX859Channel(ChatChannel):
         # 固定使用859协议
         logger.info("使用协议版本: 859")
         
-        api_host = conf().get("wx859_api_host", "127.0.0.1")
-        api_port = conf().get("wx859_api_port", 8059)
-        
         # 859协议根据swagger.json定义，使用/api前缀
         api_path_prefix = "/api"
         logger.info(f"使用API路径前缀: {api_path_prefix} (适用于859协议)")
@@ -549,7 +548,7 @@ class WX859Channel(ChatChannel):
         # 初始化WechatAPI客户端
         try:
             # 使用859协议客户端
-            self.bot = WechatAPI.WechatAPIClient(api_host, api_port)
+            self.bot = WechatAPI.WechatAPIClient(self.api_host, self.api_port)
             logger.info("使用859协议客户端")
             
             # 设置API路径前缀 - 确保正确设置
@@ -571,7 +570,7 @@ class WX859Channel(ChatChannel):
             return False
         
         # 等待 WechatAPI 服务启动
-        service_ok = await self._check_api_service(api_host, api_port, api_path_prefix)
+        service_ok = await self._check_api_service(self.api_host, self.api_port, api_path_prefix)
         if not service_ok:
             logger.error("[WX859] WechatAPI 服务连接失败")
             return False
@@ -684,7 +683,7 @@ class WX859Channel(ChatChannel):
 
     async def _check_api_service(self, api_host, api_port, api_path_prefix):
         """检查API服务是否可用"""
-        logger.info(f"尝试连接到 WechatAPI 服务 (地址: {api_host}:{api_port}{api_path_prefix})")
+        logger.info(f"尝试连接到 WechatAPI 服务 (地址: {self.api_host}:{self.api_port}{api_path_prefix})")
         
         time_out = 30
         is_connected = False
@@ -702,7 +701,7 @@ class WX859Channel(ChatChannel):
                 async with aiohttp.ClientSession() as session:
                     try:
                         # 尝试访问登录接口，确保URL格式正确
-                        url = f"http://{api_host}:{api_port}{api_path_prefix}/Login/LoginGetQR"
+                        url = f"http://{self.api_host}:{self.api_port}{api_path_prefix}/Login/LoginGetQR"
                         logger.debug(f"尝试连接: {url}")
                         async with session.get(url, timeout=5) as response:
                             if response.status in [200, 401, 403, 404]:  # 任何HTTP响应都表示服务在运行
@@ -713,7 +712,7 @@ class WX859Channel(ChatChannel):
                         logger.debug(f"API路径请求失败: {e}")
                         
                         # 如果特定路径失败，尝试访问根路径
-                        url = f"http://{api_host}:{api_port}/"
+                        url = f"http://{self.api_host}:{self.api_port}/"
                         logger.debug(f"尝试连接根路径: {url}")
                         try:
                             async with session.get(url, timeout=5) as response:
@@ -879,7 +878,7 @@ class WX859Channel(ChatChannel):
                     logger.info(f"[WX859] 正在调用AutoHeartBeat API启动消息监听...")
                     try:
                         async with aiohttp.ClientSession() as session:
-                            heartbeat_url = f"http://127.0.0.1:8059/api/Login/AutoHeartBeat?wxid={new_wxid}"
+                            heartbeat_url = f"http://{self.api_host}:{self.api_port}/api/Login/AutoHeartBeat?wxid={new_wxid}"
                             async with session.post(heartbeat_url) as response:
                                 heartbeat_result = await response.json()
                                 if heartbeat_result and heartbeat_result.get("Success", False):
@@ -938,10 +937,10 @@ class WX859Channel(ChatChannel):
     async def _wait_for_phone_confirmation_and_complete_login(self, uuid, wxid):
         """等待手机端确认登录并完成完整登录流程"""
         logger.info(f"[WX859] 开始等待手机端确认登录，wxid: {wxid}")
-        
+
         # 等待手机端确认的超时时间（2分钟）
         confirmation_timeout = 120
-        
+
         import aiohttp
         async with aiohttp.ClientSession() as session:
             while confirmation_timeout > 0:
@@ -950,7 +949,7 @@ class WX859Channel(ChatChannel):
                     
                     # 步骤1：调用LoginCheckQR API确认扫码状态
                     logger.debug("[WX859] 正在调用LoginCheckQR API...")
-                    qr_check_url = f"http://127.0.0.1:8059/api/Login/LoginCheckQR?uuid={uuid}"
+                    qr_check_url = f"http://{self.api_host}:{self.api_port}/api/Login/LoginCheckQR?uuid={uuid}"
                     async with session.post(qr_check_url) as response:
                         qr_check_result = await response.json()
 
@@ -981,11 +980,11 @@ class WX859Channel(ChatChannel):
                         
                         # 根据获取到的wxid选择API调用方式
                         if real_wxid and not real_wxid.startswith("temp_"):
-                            twice_auth_url = f"http://127.0.0.1:8059/api/Login/LoginTwiceAutoAuth?wxid={real_wxid}"
+                            twice_auth_url = f"http://{self.api_host}:{self.api_port}/api/Login/LoginTwiceAutoAuth?wxid={real_wxid}"
                             logger.info(f"[WX859] 使用真实wxid参数调用LoginTwiceAutoAuth: {real_wxid}")
                         else:
                             # 作为备选方案，使用uuid
-                            twice_auth_url = f"http://127.0.0.1:8059/api/Login/LoginTwiceAutoAuth?uuid={uuid}"
+                            twice_auth_url = f"http://{self.api_host}:{self.api_port}/api/Login/LoginTwiceAutoAuth?uuid={uuid}"
                             logger.info(f"[WX859] 使用uuid参数调用LoginTwiceAutoAuth: {uuid}")
                         
                         async with session.post(twice_auth_url) as response:
@@ -1026,7 +1025,10 @@ class WX859Channel(ChatChannel):
     async def _wait_for_newinit_success(self, wxid, session):
         """持续调用Newinit API直到返回用户详细信息"""
         logger.info(f"[WX859] 开始等待Newinit API返回用户详细信息...")
-        
+
+        api_host = conf().get("wx859_api_host", "127.0.0.1")
+        api_port = conf().get("wx859_api_port", 8059)
+
         # Newinit检测超时时间（1分钟）
         newinit_timeout = 60
         
@@ -1035,7 +1037,7 @@ class WX859Channel(ChatChannel):
             try:
                 call_count += 1
                 logger.info(f"[WX859] 第{call_count}次调用Newinit API，剩余 {newinit_timeout} 秒...")
-                newinit_url = f"http://127.0.0.1:8059/api/Login/Newinit?wxid={wxid}"
+                newinit_url = f"http://{api_host}:{api_port}/api/Login/Newinit?wxid={wxid}"
                 
                 async with session.post(newinit_url) as response:
                     response_status = response.status
@@ -1412,7 +1414,7 @@ class WX859Channel(ChatChannel):
             logger.info(f"[WX859] 正在启动自动心跳，wxid: {wxid}")
             import aiohttp
             async with aiohttp.ClientSession() as session:
-                heartbeat_url = f"http://127.0.0.1:8059/api/Login/AutoHeartBeat?wxid={wxid}"
+                heartbeat_url = f"http://{self.api_host}:{self.api_port}/api/Login/AutoHeartBeat?wxid={wxid}"
                 async with session.post(heartbeat_url) as response:
                     heartbeat_result = await response.json()
                     if heartbeat_result and heartbeat_result.get("Success", False):
