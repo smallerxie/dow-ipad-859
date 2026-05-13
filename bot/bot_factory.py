@@ -37,7 +37,8 @@ def create_bot(bot_type):
         const.LONGCAT_FLASH_LITE,
         const.LONGCAT_FLASH_CHAT,
         const.LONGCAT_THINKING,
-        const.LONGCAT_THINKING_2601
+        const.LONGCAT_THINKING_2601,
+        const.LONGCAT_2_0_PREVIEW
     ]:
         from bot.longcat.longcat_bot import LongCatBot
         return LongCatBot()    

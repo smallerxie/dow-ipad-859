@@ -73,8 +73,8 @@ class Bridge(object):
                 self.btype["chat"] = const.DEEPSEEK
 
             # LongCat models
-            logger.debug(f"[Bridge] Checking LongCat models: {model_type} in {[const.LONGCAT_FLASH_LITE, const.LONGCAT_FLASH_CHAT, const.LONGCAT_THINKING, const.LONGCAT_THINKING_2601]}")
-            if model_type in [const.LONGCAT_FLASH_LITE, const.LONGCAT_FLASH_CHAT, const.LONGCAT_THINKING, const.LONGCAT_THINKING_2601]:
+            logger.debug(f"[Bridge] Checking LongCat models: {model_type} in {[const.LONGCAT_FLASH_LITE, const.LONGCAT_FLASH_CHAT, const.LONGCAT_THINKING, const.LONGCAT_THINKING_2601, const.LONGCAT_2_0_PREVIEW]}")
+            if model_type in [const.LONGCAT_FLASH_LITE, const.LONGCAT_FLASH_CHAT, const.LONGCAT_THINKING, const.LONGCAT_THINKING_2601, const.LONGCAT_2_0_PREVIEW]:
                 self.btype["chat"] = const.LONGCAT
                 logger.info(f"[Bridge] Matched LongCat model: {model_type} -> {const.LONGCAT}")
 

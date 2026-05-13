@@ -43,6 +43,7 @@ LONGCAT_THINKING_2601 = "LongCat-Flash-Thinking-2601"
 LONGCAT_THINKING = "LongCat-Flash-Thinking"
 LONGCAT_FLASH_CHAT = "LongCat-Flash-Chat"
 LONGCAT_FLASH_LITE = "LongCat-Flash-Lite"
+LONGCAT_2_0_PREVIEW = "LongCat-2.0-Preview"
 
 # dashscope models
 QWEN_35_PLUS = "qwen3.5-plus"
