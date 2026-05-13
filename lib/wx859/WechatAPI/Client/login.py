@@ -301,7 +301,11 @@ class LoginMixin(WechatAPIClientBase):
             response = await session.post(self._get_full_url(f"/Login/HeartBeat?wxid={self.wxid}"))
             json_resp = await response.json()
 
-            if json_resp.get("Success") and json_resp.get("Data").get("status") == 0:
+            # 兼容两种返回格式：
+            # wx859: {"Success": true, "Data": {"status": 0}}
+            # wx857: {"Success": true, "Data": {"BaseResponse": {"ret": 0}}}
+            data = json_resp.get("Data") or {}
+            if json_resp.get("Success") and (data.get("status") == 0 or data.get("BaseResponse", {}).get("ret") == 0):
                 return True
             else:
                 return False

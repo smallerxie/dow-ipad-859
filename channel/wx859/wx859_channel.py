@@ -1188,7 +1188,7 @@ class WX859Channel(ChatChannel):
                 logger.info(f"[WX859] 心跳检测成功，wxid={wxid}处于登录状态")
                 return True
             else:
-                logger.debug(f"[WX859] 心跳检测失败，wxid={wxid}不在登录状态")
+                logger.info(f"[WX859] 心跳检测失败，wxid={wxid}不在登录状态")
                 return False
         except Exception as e:
             logger.debug(f"[WX859] 检查登录状态失败: {e}")
