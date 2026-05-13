@@ -12,7 +12,9 @@ from .user import UserMixin
 from .pyq import PyqMixin
 import sqlite3
 import os
-from loguru import logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 class WechatAPIClient(LoginMixin, MessageMixin, FriendMixin, ChatroomMixin, UserMixin,
                       ToolMixin, ToolExtensionMixin, HongBaoMixin, PyqMixin):

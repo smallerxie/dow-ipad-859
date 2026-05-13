@@ -3,7 +3,9 @@ import aiohttp
 from .base import *
 from .protect import protector
 from ..errors import *
-# from loguru import logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 class UserMixin(WechatAPIClientBase):
     async def get_profile(self, wxid: str = None) -> dict:
@@ -32,7 +34,7 @@ class UserMixin(WechatAPIClientBase):
             json_resp = await response.json()
             
             if json_resp.get("Success"):
-                # logger.info("账号信息:{}",json_resp.get("Data"))
+                # logger.info("账号信息:%s", json_resp.get("Data"))
                 return json_resp.get("Data")
             else:
                 self.error_handler(json_resp)
@@ -109,7 +111,7 @@ class UserMixin(WechatAPIClientBase):
             json_resp = await response.json()
             
             if json_resp.get("Success"):
-                # logger.info("账号信息:{}",json_resp.get("Data"))
+                # logger.info("账号信息:%s", json_resp.get("Data"))
                 return json_resp.get("Data").get("labelPairList")
             else:
                 self.error_handler(json_resp)

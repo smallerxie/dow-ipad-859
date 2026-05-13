@@ -141,19 +141,10 @@ try:
             else:
                 raise
     
-    # 设置 WechatAPI 的 loguru 日志级别（关键修改）
+    # 设置 WechatAPI 的日志级别，默认为 ERROR 以减少输出
     try:
-        from loguru import logger as api_logger
-        import logging
-        
-        # 移除所有现有处理器
-        api_logger.remove()
-        
-        # 获取配置的日志级别，默认为 ERROR 以减少输出
         log_level = conf().get("log_level", "ERROR")
-        
-        # 添加新的处理器，仅输出 ERROR 级别以上的日志
-        api_logger.add(sys.stderr, level=log_level)
+        logging.getLogger("lib.wx859.WechatAPI").setLevel(getattr(logging, log_level, logging.ERROR))
         logger.info(f"已设置 WechatAPI 日志级别为: {log_level}")
     except Exception as e:
         logger.error(f"设置 WechatAPI 日志级别时出错: {e}")

@@ -8,13 +8,16 @@ from pathlib import Path
 from typing import Union
 
 import aiohttp
-from loguru import logger
 from pydub import AudioSegment
 from pymediainfo import MediaInfo
 
 from .base import *
 from .protect import protector
 from ..errors import *
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class MessageMixin(WechatAPIClientBase):
@@ -88,7 +91,7 @@ class MessageMixin(WechatAPIClientBase):
             json_resp = await response.json()
 
             if json_resp.get("Success"):
-                logger.info("消息撤回成功: 对方wxid:{} ClientMsgId:{} CreateTime:{} NewMsgId:{}",
+                logger.info("消息撤回成功: 对方wxid:%s ClientMsgId:%s CreateTime:%s NewMsgId:%s",
                             wxid,
                             client_msg_id,
                             new_msg_id)
@@ -137,7 +140,7 @@ class MessageMixin(WechatAPIClientBase):
             response = await session.post(self._get_full_url("/Msg/SendTxt"), json=json_param)
             json_resp = await response.json()
             if json_resp.get("Success"):
-                logger.info("发送文字消息: 对方wxid:{} at:{} 内容:{}", wxid, at, content)
+                logger.info("发送文字消息: 对方wxid:%s at:%s 内容:%s", wxid, at, content)
                 data = json_resp.get("Data")
                 return data.get("List")[0].get("ClientMsgid"), data.get("List")[0].get("Createtime"), data.get("List")[
                     0].get("NewMsgId")
@@ -185,7 +188,7 @@ class MessageMixin(WechatAPIClientBase):
 
             if json_resp.get("Success"):
                 json_param.pop('Base64')
-                logger.info("发送图片消息: 对方wxid:{} 图片base64略", wxid)
+                logger.info("发送图片消息: 对方wxid:%s 图片base64略", wxid)
                 # 返回完整的响应结果
                 return json_resp
             else:
@@ -275,7 +278,7 @@ class MessageMixin(WechatAPIClientBase):
 
         # 打印预估时间，300KB/s
         predict_time = int(file_len / 1024 / 300)
-        logger.info("开始发送视频: 对方wxid:{} 视频base64略 图片base64略 预计耗时:{}秒", wxid, predict_time)
+        logger.info("开始发送视频: 对方wxid:%s 视频base64略 图片base64略 预计耗时:%s秒", wxid, predict_time)
 
         async with aiohttp.ClientSession() as session:
             json_param = {"Wxid": self.wxid, "ToWxid": wxid, "Base64": vid_base64, "ImageBase64": image_base64,
@@ -286,7 +289,7 @@ class MessageMixin(WechatAPIClientBase):
         if json_resp.get("Success"):
             json_param.pop('Base64')
             json_param.pop('ImageBase64')
-            logger.info("发送视频成功: 对方wxid:{} 时长:{} 视频base64略 图片base64略", wxid, duration)
+            logger.info("发送视频成功: 对方wxid:%s 时长:%s 视频base64略 图片base64略", wxid, duration)
             data = json_resp.get("Data")
             return data.get("clientMsgId"), data.get("newMsgId")
         else:
@@ -361,7 +364,7 @@ class MessageMixin(WechatAPIClientBase):
 
             if json_resp.get("Success"):
                 json_param.pop('Base64')
-                logger.info("发送语音消息: 对方wxid:{} 时长:{} 格式:{} 音频base64略", wxid, duration, format)
+                logger.info("发送语音消息: 对方wxid:%s 时长:%s 格式:%s 音频base64略", wxid, duration, format)
                 data = json_resp.get("Data")
                 # 不尝试将ClientMsgId转换为整数，因为它可能包含群聊ID和时间戳
                 return data.get("ClientMsgId"), data.get("CreateTime"), data.get("NewMsgId")
@@ -416,7 +419,7 @@ class MessageMixin(WechatAPIClientBase):
             json_resp = await response.json()
 
             if json_resp.get("Success"):
-                logger.info("发送链接消息: 对方wxid:{} 链接:{} 标题:{} 描述:{} 缩略图链接:{}",
+                logger.info("发送链接消息: 对方wxid:%s 链接:%s 标题:%s 描述:%s 缩略图链接:%s",
                             wxid,
                             url,
                             title,
@@ -440,7 +443,7 @@ class MessageMixin(WechatAPIClientBase):
             json_resp = await response.json()
 
             if json_resp.get("Success"):
-                logger.info("发送定位消息: 对方wxid:{} 链接:{} 标题:{} 描述:{} 比例:{} X:{} Y:{}",
+                logger.info("发送定位消息: 对方wxid:%s 链接:%s 标题:%s 描述:%s 比例:%s X:%s Y:%s",
                             wxid,
                             Infourl,
                             Label,
@@ -483,7 +486,7 @@ class MessageMixin(WechatAPIClientBase):
             json_resp = await response.json()
 
             if json_resp.get("Success"):
-                logger.info("发送表情消息: 对方wxid:{} md5:{} 总长度:{}", wxid, md5, total_length)
+                logger.info("发送表情消息: 对方wxid:%s md5:%s 总长度:%s", wxid, md5, total_length)
                 return json_resp.get("Data").get("emojiItem")
             else:
                 self.error_handler(json_resp)
@@ -522,7 +525,7 @@ class MessageMixin(WechatAPIClientBase):
             json_resp = await response.json()
 
             if json_resp.get("Success"):
-                logger.info("发送名片消息: 对方wxid:{} 名片wxid:{} 名片备注:{} 名片昵称:{}", wxid,
+                logger.info("发送名片消息: 对方wxid:%s 名片wxid:%s 名片备注:%s 名片昵称:%s", wxid,
                             card_wxid,
                             card_alias,
                             card_nickname)
@@ -563,7 +566,7 @@ class MessageMixin(WechatAPIClientBase):
 
             if json_resp.get("Success"):
                 json_param["Xml"] = json_param["Xml"].replace("\n", "")
-                logger.info("发送app消息: 对方wxid:{} 类型:{} xml:{}", wxid, type, json_param["Xml"])
+                logger.info("发送app消息: 对方wxid:%s 类型:%s xml:%s", wxid, type, json_param["Xml"])
                 return json_resp.get("Data").get("clientMsgId"), json_resp.get("Data").get(
                     "createTime"), json_resp.get("Data").get("newMsgId")
             else:
@@ -598,7 +601,7 @@ class MessageMixin(WechatAPIClientBase):
             json_resp = await response.json()
 
             if json_resp.get("Success"):
-                logger.info("转发文件消息: 对方wxid:{} xml:{}", wxid, xml)
+                logger.info("转发文件消息: 对方wxid:%s xml:%s", wxid, xml)
                 # 返回完整的响应结果
                 return json_resp
             else:
@@ -633,7 +636,7 @@ class MessageMixin(WechatAPIClientBase):
             json_resp = await response.json()
 
             if json_resp.get("Success"):
-                logger.info("转发图片消息: 对方wxid:{} xml:{}", wxid, xml)
+                logger.info("转发图片消息: 对方wxid:%s xml:%s", wxid, xml)
                 data = json_resp.get("Data")
                 return data.get("ClientImgId").get("string"), data.get("CreateTime"), data.get("Newmsgid")
             else:
@@ -668,7 +671,7 @@ class MessageMixin(WechatAPIClientBase):
             json_resp = await response.json()
 
             if json_resp.get("Success"):
-                logger.info("转发视频消息: 对方wxid:{} xml:{}", wxid, xml)
+                logger.info("转发视频消息: 对方wxid:%s xml:%s", wxid, xml)
                 data = json_resp.get("Data")
                 return data.get("clientMsgId"), data.get("newMsgId")
             else:

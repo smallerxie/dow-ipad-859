@@ -11,7 +11,9 @@ except ImportError:
     pysilk = None
     PYSILK_AVAILABLE = False
 from pydub import AudioSegment
-from loguru import logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 from .base import *
 from .protect import protector
@@ -441,7 +443,7 @@ class ToolMixin(WechatAPIClientBase):
             json_resp = await response.json()
 
             if json_resp.get("Success"):
-                logger.info("下载表情: MD5:{}", md5)
+                logger.info("下载表情: MD5:%s", md5)
                 return json_resp
             else:
                 self.error_handler(json_resp)
