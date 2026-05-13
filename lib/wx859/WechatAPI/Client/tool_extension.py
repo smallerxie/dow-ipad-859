@@ -2,7 +2,10 @@ import aiohttp
 import base64
 from .base import WechatAPIClientBase
 from ..errors import UserLoggedOut
-from loguru import logger
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ToolExtensionMixin(WechatAPIClientBase):
     async def get_msg_image(self, aeskey: str, cdnmidimgurl: str) -> bytes:
